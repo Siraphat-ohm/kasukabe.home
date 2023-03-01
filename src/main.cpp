@@ -1,10 +1,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Ultrasonic.h>
-#include <LiquidCrystal_I2C.h>
 
 Ultrasonic ultrasonic(D6, D5);
-LiquidCrystal_I2C lcd(0x3F, 16, 2);
 
 #define Motor_L D3
 #define Motor_R D4
@@ -24,20 +22,11 @@ void setup() {
   digitalWrite(Motor_L, 0);
   digitalWrite(Motor_R, 0);
 
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(0,0);
-  lcd.clear();
-
 }
 
 void loop() {
 
   int distance = ultrasonic.read();
-  lcd.print("distance: ");
-  lcd.print(distance);
-  lcd.print(" cm");
-  lcd.clear();
 
   if ( distance >= 0 && distance <= 7) {
 
@@ -60,11 +49,4 @@ void loop() {
       digitalWrite(Motor_L, 0);
       digitalWrite(Motor_R, 0);
   }
-
-  Serial.print(isOpen);
-  Serial.println();
-
-  Serial.print(isClose);
-  Serial.println();
-  delay(1000);
 }
