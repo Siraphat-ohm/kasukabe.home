@@ -1,20 +1,19 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>
 #include <Ultrasonic.h>
+#include <LiquidCrystal_I2C.h>
 
 Ultrasonic ultrasonic(D6, D5);
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
 
 #define Motor_L D3
 #define Motor_R D4
 
-#define Switch1 D6
-#define Switch2 D7
+bool isOpen = true;
+bool isClose = false;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(Switch1, INPUT);
-  pinMode(Switch2, INPUT);
 
   pinMode(Motor_L, OUTPUT);
   pinMode(Motor_R, OUTPUT);
@@ -25,33 +24,47 @@ void setup() {
   digitalWrite(Motor_L, 0);
   digitalWrite(Motor_R, 0);
 
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0,0);
+  lcd.clear();
+
 }
 
 void loop() {
 
-  int v_switch1 = digitalRead(Switch1);
-  int v_switch2 = digitalRead(Switch2);
-
   int distance = ultrasonic.read();
-  Serial.println(distance);
+  lcd.print("distance: ");
+  lcd.print(distance);
+  lcd.print(" cm");
+  lcd.clear();
 
-  delay(1000);
+  if ( distance >= 0 && distance <= 7) {
 
-  if ( distance >= 0 && distance <= 7){
-
-    if ( v_switch1 == 1 && v_switch2 == 0){
-      Serial.println("is open");
+    isClose = true;
+    if ( isOpen ) {
       digitalWrite(Motor_L, 1);
       digitalWrite(Motor_R, 0);
       delay(2500);
+      isOpen = false;
     } 
-  } else if ( v_switch1 == 0 && v_switch2 == 1) {
-      Serial.println("is close");
+
+  } else if( isClose ) {
       digitalWrite(Motor_L, 0);
       digitalWrite(Motor_R, 1);
       delay(2500);
+      isOpen = true;
+      isClose = false;
 
+  } else {
       digitalWrite(Motor_L, 0);
       digitalWrite(Motor_R, 0);
-    }
+  }
+
+  Serial.print(isOpen);
+  Serial.println();
+
+  Serial.print(isClose);
+  Serial.println();
+  delay(1000);
 }
